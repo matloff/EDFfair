@@ -1,0 +1,46 @@
+
+The files EDF* are for Explicitly Deweighted Features (EDF).
+SaveScript1 is a record of experiments, but using earlier file
+structure.  RegAvging.R is for another project.
+
+My qeML package is not yet on CRAN; available at github.com/matloff/qeML
+
+The utilities are in EDF_Misc.R and EDF_CorrrSens.R.  Code for
+individual ML methods is in the other files, e.g. EDF_Ridge.R.
+
+General notes:
+
+   The rho values, correlations between predicted values and S (replace
+   latter by P(S = 1 | X) for S binary/categorical) are computed by
+   corrsens().
+
+   Return values include qeML-style quantities such as testAcc and
+   baseAcc.
+
+Notes on specific functions:
+
+   qeFairRidgeLin():
+
+      The 'lambdas' argument is an R list, specifying the lambda values
+      for each feature in the C set.  Categorical feature are expanded
+      to dummy variables, with the same lambda value for each.
+
+Examplee:
+
+   > z <- qeFairRF(pef,'wageinc',list(occ=0.1),'sex')
+   > z$testAcc
+   [1] 24005.35
+   > z$corrs
+         sex 
+   0.1431146 
+
+   Here, we predict income from various features (all the remaining
+   ones), with S = gender and C = occupation.  The Mean Absolute
+   Prediction Error on the holdout set was about $24K, with correlation
+   between C and S being about 0.14.  The correlation here was 
+
+      rho[est. P(Y = 1 | X), est. P(S = 1 | X)]
+
+   Occupation was deweighted, so less likely to be in a tree, to 0.1
+   (applied to each dummy variable resulting from expanding 'occ').
+

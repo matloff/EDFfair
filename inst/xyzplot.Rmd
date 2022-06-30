@@ -1,0 +1,530 @@
+---
+title: "graph"
+author: "WENXI ZHANG"
+date: "6/1/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+ExpandVars <- function( data,Cvar,Weight)
+{
+  expandVal <- NULL
+  expand <- NULL
+  expandvar<- NULL
+  lvls <- NULL
+  for (C in 1:length(Cvar)){
+    if (is.factor(data[,Cvar[C]])){
+      lvls <- levels(data[,Cvar[C]])
+      for (i in 1:length(lvls)){
+        expandvar <- c (expandvar,paste0(Cvar[C],'.',lvls[i]))
+        }
+      if (length(lvls) > 1){
+        expandVal <- c(expandVal,rep(Weight[C],length(lvls)))
+      } else{
+        expandVal <- c(expandVal,Weight[C])
+            }
+    } else{
+        expandvar <- c(expandvar,Cvar[C])
+        expandVal <- c(expandVal,Weight[C])
+      }
+    
+  }
+  expand$val <- expandVal
+  expand$var <- expandvar
+  expand
+}
+require(qeML)
+require(regtools)
+runExpt <- function(nReps,cmdPartial,xvals,code='')
+{
+   res <- matrix(nrow=length(xvals),ncol=3)
+   for (i in 1:length(xvals)) {
+      x <- xvals[i]
+      cmd <- sub('xoxo',x,cmdPartial)
+      cmd <- paste0('z <- ',cmd)
+      cmd <- paste0(cmd,'; c(z$testAcc,z$corrs)')
+      # repOut <- replicMeans(nReps,cmd)
+      repOut <- t(replicate(nReps,eval(parse(text=cmd))))
+      repMeans <- colMeans(repOut)  # add std. errors later
+      res[i,1] <- x
+      res[i,-1] <- repMeans 
+   }
+   attr(res,'call') <- match.call()
+   res <- as.data.frame(res)
+   res$code <- code
+   class(res) <- 'runExpt'
+   res
+}
+
+expandRange <- function(rng,expAmt) 
+{
+   width <- rng[2] - rng[1]
+   midpt <- mean(rng)
+   newwidth <- expAmt * width
+   nw2 <- newwidth / 2
+   c(midpt-nw2,midpt+nw2)
+}
+
+plot.runExpt <- function(runExptOut,clrs=palette(),
+                   xlim=expandRange(range(runExptOut[,2]),1.2), 
+                   ylim=expandRange(range(runExptOut[,3]),3.2), 
+                   legendPos='bottomright')
+
+{
+   xyzPlotEDF(runExptOut[,c(2,3,1,4)],clrs=clrs,xlim=xlim,ylim=ylim,
+      legendPos=legendPos)
+}
+
+# modified version of regtools::xyzPlot()
+
+xyzPlotEDF <- function(xyz, clrs = NULL, cexText = 1, xlim = NULL, ylim = NULL,
+    xlab = NULL, ylab = NULL, legendPos = NULL, plotType = "l") 
+{
+    if (is.null(xlim))
+        xlim <- range(xyz[, 1])
+    if (is.null(ylim))
+        ylim <- range(xyz[, 2])
+    if (is.null(xlab))
+        xlab <- "x"
+    if (is.null(ylab))
+        ylab <- "y"
+    # how many lines will be plotted?
+    nGrps <- length(unique(xyz[,4]))
+    if (is.null(clrs)) {
+        if (nGrps == 1)
+            clrs <- "black"
+        else clrs <- heat.colors(length(unique(xyz[, 4])))
+    }
+    if (plotType == "l")
+        xyz <- xyz[order(xyz[, 1]), ]
+    nr <- nrow(xyz)
+    lineGrps <- if (nGrps == 1)
+        list(1:nr)
+    else split(1:nr, xyz[, 4])
+    nGrps <- length(lineGrps)
+    plot(1, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab,cex = 0.1)
+    for (i in 1:nGrps) {
+        if (plotType == "l") {
+            lines(xyz[lineGrps[[i]], 1:2], type = "l", col = clrs[i])
+        }
+        else points(xyz[lineGrps[[i]], 1:2], col = clrs[i], cex = 0.1)
+    }
+    for (i in 1:nGrps) {
+        lns <- xyz[lineGrps[[i]], ]
+        text(lns[, 1], lns[, 2], lns[, 3], cex = cexText, col = clrs[i])
+    }
+    if (nGrps > 1)
+        legend(legendPos, legend = unique(xyz[, 4]), col = clrs,
+            lty = 1)
+
+}
+corrsens_modified <- function(data,yName,fittedObject,sensNames=NULL) 
+{
+  classif <- fittedObject$classif
+  if (is.null(classif)) stop('"classif" missing in fittedObject')
+  
+  preds <- if(classif) fittedObject$regests[,1] else fittedObject$ypreds#ORG: 
+  #if(classif) preds <- fittedObject$holdoutPreds$probs[,1] else fittedObject$holdoutPreds
+  #else fittedObject$ypreds
+  xNames <- setdiff(names(data),c(yName,sensNames))
+  xSensNames <- setdiff(names(data),c(yName))
+  holdIdxs <- fittedObject$holdIdxs
+  
+  corrs <- NULL  # eventual output
+  nCorrs <- 0
+  for (sensNm in sensNames) {
+    sens <- data[sensNm][holdIdxs,]
+    # the case of factor sens is more complex, for 2 reasons:
+    # 1. we must change the 1 or more dummies to probabilities, so
+    # that cor() makes sense, and 2. if this is a categorical
+    # variable, not Bernoulli, then we must call cor() on each of the
+    # resulting dummies
+    if (is.factor(sens)) {
+      # item 1 above
+      lvls <- levels(sens)
+      sens <- as.numeric(sens)
+      nLvls <- length(lvls)
+      if (nLvls == 2) {
+        frml <- paste0(sensNm,' ~ .')
+        frml <- as.formula(frml)
+        tmp <- glm(frml,data[xSensNames],family=binomial())
+        sensProbs <- tmp$fitted.values[holdIdxs]
+        corrs <- c(corrs,cor(preds,sensProbs)^2)
+        nCorrs <- nCorrs + 1
+        names(corrs)[nCorrs] <- sensNm
+      } else {
+        # item 2; want 1 col of probs for Bernoulli sens, or 1 col 
+        # for each dummy in the categorical case
+        tmp <- qeLogit(data[xSensNames],sensNm,holdout=NULL)
+        for (i in 1:length(tmp$glmOuts)) {
+          glmout <- tmp$glmOuts[[i]]
+          sens <- glmout$fitted.values[holdIdxs]
+          corrs <- c(corrs,cor(preds,sens)^2)
+          nCorrs <- nCorrs + 1
+          nm <- paste0(sensNm,'.',lvls[i])
+          names(corrs)[nCorrs] <- nm
+        }
+      }
+    } else {
+      corrs <- c(corrs,cor(preds,sens)^2)
+      nCorrs <- nCorrs + 1
+      names(corrs)[nCorrs] <- sensNm
+    }
+  }
+  
+  corrs
+  
+}
+
+
+kNN <- function (x, y, newx = x, kmax, scaleX = TRUE, PCAcomps = 0, 
+             expandVars = NULL, expandVals = NULL, smoothingFtn = mean, 
+             allK = FALSE, leave1out = FALSE, classif = FALSE, startAt1 = TRUE, 
+             saveNhbrs = FALSE, savedNhbrs = NULL) 
+{
+  if (PCAcomps > 0) 
+    stop("PCA now must be done separately")
+  if (allK) 
+    stop("allK option currenttly disabled")
+  if (identical(smoothingFtn, loclin) && kmax < 3) 
+    stop("loclin requires k >= 3")
+  if (identical(smoothingFtn, vary) && kmax < 2) 
+    stop("vary requires k >= 2")
+  noPreds <- is.null(newx)
+  nms <- colnames(x)
+  startA1adjust <- if (startAt1) 
+    0
+  else 1
+  if (is.vector(x)) 
+    x <- matrix(x, ncol = 1)
+  if (hasFactors(x)) 
+    stop("use factorsToDummies() to create dummies")
+  if (is.data.frame(x)) 
+    x <- as.matrix(x)
+  ccout <- constCols(x)
+  if (length(ccout) > 0) {
+    warning("X data has constant columns:")
+    print(ccout)
+    print("deleting")
+    x <- x[, -ccout]
+  }
+  else ccout <- NULL
+  nYvals <- length(unique(y))
+  if (is.vector(y)) {
+    if (classif && nYvals > 2) 
+      y <- factorsToDummies(as.factor(y), omitLast = FALSE)
+    else y <- matrix(y, ncol = 1)
+  }
+  if (!is.vector(y) && !is.matrix(y)) 
+    stop("y must be vector or matrix")
+  if (identical(smoothingFtn, mean)) 
+    smoothingFtn <- meany
+  if (ncol(y) > 1 && !allK) 
+    classif <- TRUE
+  if (is.factor(newx) || is.data.frame(newx) && hasFactors(newx)) 
+    stop("change to dummies, factorsToDummies()")
+  if (is.vector(newx)) {
+    nms <- names(newx)
+    newx <- matrix(newx, ncol = ncol(x))
+    colnames(newx) <- nms
+  }
+  if (is.data.frame(newx)) {
+    newx <- as.matrix(newx)
+  }
+  if (nrow(y) != nrow(x)) 
+    stop("number of X data points not equal to that of Y")
+  if (noPreds) 
+    newx <- x
+  kmax1 <- kmax + leave1out
+  if (scaleX) {
+    
+    x <- mmscale(x)
+    colnames(x) <- nms
+    xminmax <- attr(x, "minmax")
+    newx <- mmscale(newx, scalePars = xminmax)
+    colnames(newx) <- nms
+    
+  }
+  else xminmax <- NULL
+  eVars <- !is.null(expandVars)
+  eVals <- !is.null(expandVals)
+  if (eVars || eVals) {
+    if (length(expandVars) != length(expandVals)) 
+      stop("expandVars and expandVals must have the same length")
+    x <- multCols(x, expandVars, expandVals)
+    newx <- multCols(newx, expandVars, expandVals)
+  }
+  if (is.null(savedNhbrs)) {
+    tmp <- FNN::get.knnx(data = x, query = newx, k = kmax1)
+  }
+  else {
+    tmp <- savedNhbrs
+  }
+  closestIdxs <- tmp$nn.index[, 1:(kmax + leave1out), drop = FALSE]
+  if (leave1out) 
+    closestIdxs <- closestIdxs[, -1, drop = FALSE]
+  if (kmax1 == 1) {
+    regests <- y[closestIdxs, ]
+  }
+  else {
+    fyh <- function(newxI) smoothingFtn(closestIdxs[newxI, 
+    ], x, y, newx[newxI, ])
+    regests <- sapply(1:nrow(newx), fyh)
+    if (ncol(y) > 1) 
+      regests <- t(regests)
+  }
+  tmplist <- list(whichClosest = closestIdxs, regests = regests, 
+                  scaleX = scaleX, classif = classif, xminmax = xminmax)
+  tmplist$nhbrs <- if (saveNhbrs) 
+    tmp
+  else NULL
+  meanx <- colMeans(x)
+  covx <- cov(x)
+  tried <- try(tmplist$mhdists <- mahalanobis(newx, meanx, 
+                                              covx), silent = TRUE)
+  if (is.null(tried) || inherits(tried, "try-error")) {
+    tmplist$mhdists <- NULL
+  }
+  if (classif && !noPreds) {
+    if (ncol(y) > 1) {
+      yp <- apply(regests, 1, which.max) - startA1adjust
+      if (!allK) {
+        ypreds <- yp
+      }
+      else ypreds <- matrix(yp, nrow = kmax, byrow = TRUE)
+    }
+    else ypreds <- round(regests)
+    tmplist$ypreds <- ypreds
+  }
+  tmplist$x <- x
+  tmplist$y <- y
+  tmplist$ccout <- ccout
+  tmplist$noPreds <- noPreds
+  tmplist$leave1out <- leave1out
+  tmplist$startAt1adjust <- startA1adjust
+  tmplist$expandVars <- expandVars
+  tmplist$expandVals <- expandVals
+  class(tmplist) <- "kNN"
+  tmplist
+}
+getXY <- function (data, yName, xMustNumeric = FALSE, classif, factorsInfo = NULL, 
+          makeYdumms = FALSE) 
+{
+  if (is.vector(data) && is.null(yName)) 
+    data <- data.frame(data)
+  if (!is.data.frame(data)) 
+    stopBrowser("data must be a data frame")
+  if (!is.null(yName)) {
+    ycol <- which(names(data) == yName)
+    y <- data[, ycol]
+  }
+  else y <- ycol <- NULL
+  if (classif && !is.factor(y)) 
+    stop("Y must be a factor")
+  if (!is.null(y)) {
+    x <- data[, -ycol, drop = FALSE]
+  }
+  else x <- data
+  if (xMustNumeric) {
+    xClasses <- regtools::getDFclasses(x)
+    if (any(xClasses == "logical") || any(xClasses == "character")) {
+      print("character or logical variables currently not allowed")
+      print("change to factors")
+      return(NA)
+    }
+    x <- regtools::factorsToDummies(x, omitLast = FALSE)
+    factorsInfo <- attr(x, "factorsInfo")
+  }
+  else factorsInfo <- NULL
+  if (classif && !is.null(yName) && makeYdumms) {
+    yDumms <- regtools::factorsToDummies(y, omitLast = FALSE, 
+                                         factorsInfo = NULL)
+    classNames <- levels(y)
+    colnames(yDumms) <- classNames
+    xy <- cbind(x, yDumms)
+  }
+  else {
+    yDumms <- NULL
+    classNames <- NULL
+    xy <- NULL
+  }
+  if (classif && !is.null(yName) && !makeYdumms) 
+    classNames <- levels(y)
+  list(xy = xy, x = x, y = y, yDumms = yDumms, classNames = classNames, 
+       factorsInfo = factorsInfo)
+}
+
+
+
+
+
+qeFairKNN <- function(data, yName, deweightPars=NULL,sensNames=NULL,  holdout=floor(min(1000,0.1*nrow(data))),holdIdxs=NULL,kmax=25)
+{
+  nonSensNames <- setdiff(names(data),sensNames)
+  data1 <- data[nonSensNames]
+  if (!is.null(deweightPars)){
+  CVars <- names(deweightPars)
+  CVals <- as.numeric(deweightPars)
+  expand <- ExpandVars(data,Cvar=CVars,Weight=CVals)
+  expandVars <- expand$var
+  expandVals <- expand$val
+  }
+  
+  
+  classif <- is.factor(data1[[yName]])
+  if (classif) 
+    classNames <- levels(yName)
+  trainRow1 <- getRow1(data1, yName)
+  if (!is.null(holdout) & is.null(holdIdxs)){
+    holdIdxs <- splitData(holdout, data1)
+  }
+  if (!is.null(holdout) & !is.null(holdIdxs)){
+    data1 <- data1[-holdIdxs,]
+  }
+  xyc <- getXY(data1, yName, xMustNumeric = TRUE, classif = TRUE, 
+               makeYdumms = TRUE)
+  x <- xyc$x
+  xm <- as.matrix(x)
+  factorsInfo <- xyc$factorsInfo
+  if (!is.null(factorsInfo)) 
+    attr(xm, "factorsInfo") <- factorsInfo
+  y <- xyc$y
+  if (classif) {
+    xy <- xyc$xy
+    y <- xyc$yDumms
+    classNames <- xyc$classNames
+  }
+  if (!is.null(deweightPars)) {
+    
+    testdf <- data[nonSensNames][holdIdxs,]
+    testset <- getXY(testdf, yName, xMustNumeric = TRUE, classif = TRUE, 
+                     makeYdumms = TRUE)
+    getx <- testset$x
+    gety <- testset$yDumms
+    ycol <- which(names(testdf) == yName)
+    testout <- kNN(xm, y, newx = getx, kmax, scaleX = TRUE, 
+                   classif = classif, smoothingFtn = mean, expandVars = expandVars, expandVals = expandVals)
+    testout$testAcc <- mean(testout$ypreds != encode(testdf[,ycol]))
+    testout$classif <-classif
+    testout$holdIdxs <- holdIdxs
+    testout$baseAcc <- 1 - max(table(data[, ycol]))/nrow(data)
+    testout$newx <- getx
+    testout$corrs <- corrsens_modified(data,yName,testout,sensNames)
+  } else{
+    testdf <- data[nonSensNames][holdIdxs,]
+    testset <- getXY(testdf, yName, xMustNumeric = TRUE, classif = TRUE, 
+                     makeYdumms = TRUE)
+    getx <- testset$x
+    gety <- testset$yDumms
+    ycol <- which(names(testdf) == yName)
+    testout <- kNN(xm, y, newx = getx, kmax, scaleX = TRUE, 
+                   classif = classif, smoothingFtn = mean)
+    testout$holdIdxs <- holdIdxs
+    testout$testAcc <- mean(testout$ypreds != encode(testdf[,ycol]))
+    testout$classif <-classif
+    testout$baseAcc <- 1 - max(table(data[, ycol]))/nrow(data)
+    testout$newx <- getx
+    testout$corrs <- corrsens_modified(data,yName,testout,sensNames)
+    
+    
+  }
+  # else {
+  #   testout <- kNN(xm, y, newx = xm, 25, scaleX = TRUE, 
+  #                  classif = classif, smoothingFtn = mean, expandVars = expandVars, expandVals = expandVals)
+  # }
+
+  testout
+  }
+
+
+
+encode<-function(x){
+  as.numeric(factor(x))
+}
+load("~/Desktop/research/fair/EDF/Data/Pima.RData")
+```
+
+#mortgage
+```{r,message=FALSE,warning=FALSE}
+#change loan_val
+library("SortedEffects")
+library('FOCI')
+library(regtools)
+library(qeML)
+mortgage[,1] <- as.factor(mortgage[,1])
+runexptout <-runExpt(10,"qeFairKNN(mortgage,'deny', deweightPars=c(loan_val=xoxo,mcred=0.5,ltv_med=0.5),'black')",c(0.6,0.5,0.4,0.3,0.2,0.1),code='1')
+
+#overall probablistic of classification
+xyzPlotEDF(cbind(runexptout$V2,runexptout$V3,runexptout$V1,runexptout$code),clrs=palette(),
+                   xlim=expandRange(range(runexptout$V2),1.2), 
+                   ylim=expandRange(range(runexptout$V3),3.2), 
+                   xlab = 'OPM',ylab = 'correlation',
+                   legendPos='bottomright')
+
+runexptout <-runExpt(10,"qeFairKNN(mortgage,'deny', deweightPars=c(loan_val=0.5,mcred=xoxo,ltv_med=0.5),'black')",c(0.6,0.5,0.4,0.3,0.2,0.1),code='1')
+
+#overall probablistic of classification
+xyzPlotEDF(cbind(runexptout$V2,runexptout$V3,runexptout$V1,runexptout$code),clrs=palette(),
+                   xlim=expandRange(range(runexptout$V2),1.2), 
+                   ylim=expandRange(range(runexptout$V3),3.2), 
+                   xlab = 'OPM',ylab = 'correlation',
+                   legendPos='bottomright')
+runexptout <-runExpt(10,"qeFairKNN(mortgage,'deny', deweightPars=c(loan_val=0.5,mcred=0.5,ltv_med=xoxo),'black')",c(0.6,0.5,0.4,0.3,0.2,0.1),code='1')
+
+#overall probablistic of classification
+xyzPlotEDF(cbind(runexptout$V2,runexptout$V3,runexptout$V1,runexptout$code),clrs=palette(),
+                   xlim=expandRange(range(runexptout$V2),1.2), 
+                   ylim=expandRange(range(runexptout$V3),3.2), 
+                   xlab = 'OPM',ylab = 'correlation',
+                   legendPos='bottomright')
+```
+
+
+```{r,message=FALSE,warning=FALSE}
+# pima
+# C <-foci(Y=pima$Age,X=pima[,c(-9,-8)])
+# 
+# C$selectedVar
+# 1	NPreg			
+# 4	Thick			
+# 3	BP
+
+replicMeans(50,"{pm_knn <- qeFairKNN(pima,yName='Diab',sensNames='Age');c(pm_knn$testAcc,pm_knn$corrs)}")
+#test acc   corrs
+#0.2618421 0.2069602 
+runexptout <-runExpt(20,"qeFairKNN(pima,yName='Diab', deweightPars=c(NPreg=xoxo),sensNames='Age')",c(0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1),code='1')
+# $V1
+# [1] 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1
+# 
+# $V2
+# [1] 0.2638158 0.2605263 0.2664474 0.2427632 0.2618421 0.2730263 0.2552632 0.2532895 0.2750000
+# 
+# $V3
+# [1] 0.21911312 0.16785212 0.18729299 0.17788047 0.17384626 0.14106738 0.15039199 0.09974380 0.09959589
+#overall probablistic of classification
+xyzPlotEDF(cbind(runexptout$V2,runexptout$V3,runexptout$V1,runexptout$code),clrs=palette(),
+                   xlim=expandRange(range(runexptout$V2),1.2), 
+                   ylim=expandRange(range(runexptout$V3),3.2), 
+                   xlab = 'OPM',ylab = 'correlation',
+                   legendPos='bottomright')
+runexptout <-runExpt(20,"qeFairKNN(pima,yName='Diab', deweightPars=c(NPreg=xoxo,Thick=0.5,BP=0.5),sensNames='Age')",c(0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1),code='1')
+runexptout
+# $V1
+# [1] 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1
+# 
+# $V2
+# [1] 0.2546053 0.2125000 0.2453947 0.2460526 0.2651316 0.2328947 0.2414474 0.2664474 0.2467105
+# 
+# $V3
+# [1] 0.14918230 0.18074950 0.15188730 0.17056716 0.14559743 0.13569285 0.12073892 0.08925051 0.07034615
+
+#overall probablistic of classification
+xyzPlotEDF(cbind(runexptout$V2,runexptout$V3,runexptout$V1,runexptout$code),clrs=palette(),
+                   xlim=expandRange(range(runexptout$V2),1.2), 
+                   ylim=expandRange(range(runexptout$V3),3.2), 
+                   xlab = 'OPM',ylab = 'correlation',
+                   legendPos='bottomright')
+```

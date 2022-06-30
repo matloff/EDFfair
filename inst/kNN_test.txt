@@ -1,0 +1,45 @@
+#pima
+load("~/Desktop/research/fair/EDF/Data/Pima.RData")
+data=pima
+sensNames='Age'
+yName='Diab'
+
+expand <- ExpandVars(pima,"NPreg",1)
+pima_knn <- knnsense(pima, 'Age', 'Diab', expandVars=expand$var,expandVals = expand$val)
+pima_knn$testacc
+#0.2894737
+replicMeans(10,"corrsens(pima,'Diab',knnsense(pima, 'Age', 'Diab', expandVars=expand$var,expandVals = expand$val),sensNames='Age')")
+#0.1642449
+expand <- ExpandVars(pima,"NPreg",0.5)
+pima0.5 <- knnsense(pima, 'Age', 'Diab', expandVars=expand$var,expandVals = expand$val)
+pima0.5$testacc
+#0.2236842
+corrsens(pima,'Diab',pima0.5,sensNames='Age')
+# Age 
+# 0.1082387
+replicMeans(10,"corrsens(pima,'Diab',knnsense(pima, 'Age', 'Diab', expandVars=expand$var,expandVals = expand$val),sensNames='Age')")
+#0.1399844
+
+## lawschool
+load("~/Desktop/research/fair/EDF/Data/LawschoolBrief.RData")
+data=lawschoolbrief
+sensNames='Race'
+yName='admit'
+expand <- ExpandVars(lawschoolbrief,"Gender",1)
+lawschool_out <- knnsense(lawschoolbrief, 'Race', 'admit', expandVars=expand$var,expandVals =expand$val)
+lawschool_out$testacc
+#0.114
+replicMeans(10,"{lawschool_out <- knnsense(lawschoolbrief, 'Race', 'admit', expandVars=expand$var,expandVals =expand$val);lawschool_out$testacc}")
+#0.1091
+replicMeans(10,"{lawschool_out <- knnsense(lawschoolbrief, 'Race', 'admit', expandVars=expand$var,expandVals =expand$val); corrsens(lawschoolbrief,'admit',lawschool_out,sensNames='Race')}")
+# Race.Asian    Race.Black Race.Hispanic    Race.White 
+#    0.05512351    0.13677492    0.18317690    0.31632717
+expand <- ExpandVars(lawschoolbrief,"Gender",0.5)
+lawschool_out0.5 <- knnsense(lawschoolbrief, 'Race', 'admit', expandVars=expand$var,expandVals =expand$val)
+lawschool_out0.5$testacc
+#0.119
+replicMeans(10,"{lawschool_out0.5 <- knnsense(lawschoolbrief, 'Race', 'admit',expandVars=expand$var,expandVals =expand$val);lawschool_out0.5$testacc}")
+#0.1152
+replicMeans(10,"{lawschool_out0.5 <- knnsense(lawschoolbrief, 'Race', 'admit',expandVars=expand$var,expandVals =expand$val);corrsens(lawschoolbrief,'admit',lawschool_out0.5,sensNames='Race')}")
+# Race.Asian    Race.Black Race.Hispanic    Race.White 
+#    0.05321359    0.13492636    0.16967735    0.31274402 
