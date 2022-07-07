@@ -1,5 +1,3 @@
-
-
 ########################  prepData  #############################
 
 # common prep for all qeFair*(); here the S and C sets are as in the
@@ -33,7 +31,7 @@
 # note that prepData() does not call splitData(); this is assumed to be
 # done by the qeML function
 
-prepData <- (zzz,scaling='mmscale',expr=
+prepData <- gtools::defmacro(zzz,scaling='mmscale',expr=
    {
       ycol <- which(names(data) == yName)
       y <- data[,ycol]
@@ -72,7 +70,7 @@ prepData <- (zzz,scaling='mmscale',expr=
    }
 )
 
-########################  predictHoldout  #############################
+########################  predictHoldoutFair  #############################
 
 # modified version of qeML::predictHoldout()
 
@@ -80,12 +78,12 @@ prepData <- (zzz,scaling='mmscale',expr=
 
 # res is the return value of qeFair*()
 
-predictHoldoutFair <- defmacro(res,
+predictHoldoutFair <- gtools::defmacro(res,
    expr={
       ycol <- which(names(tst) == yName);
       ycolData <- which(names(data) == yName);
       tstx <- tst[,-ycol,drop=FALSE];
-      preds <- predict(res,tstx,processNewx=FALSE);
+      preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       if (res$classif) {
          if (is.numeric(preds)) {
@@ -294,4 +292,3 @@ prepNewx <- function(object,newx)
    colnames(newx) <- cnames
    newx
 }
-
