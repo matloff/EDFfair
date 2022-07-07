@@ -8,4 +8,4 @@ Maintainer: Norman Matloff <matloff@cs.ucdavis.edu>
             Wenxi Zhang <zwenxi22@gmail.com>,
 License: GPL (>= 2)
 Description: Explicitly Deweighted Features. reduces the impact of each feature in the proxies of sensitive variables in X variebles with a different amount ofdeweighting applied to each such feature.
-Imports: regtools, qeML, defmacro
+Imports: regtools, qeML, gtools
