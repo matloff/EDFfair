@@ -40,7 +40,7 @@ qeFairRidgeLin <- function(data,yName,deweightPars,sensNames=NULL,
 
    fairLinOut <- qeLin(dataExtended,yName,noBeta0=TRUE,holdout=NULL)
    tmp <- data[,yName]
-
+   fairLinOut$yBar <- mean(tmp)
    fairLinOut$yName <- yName
    fairLinOut$deweightPars <- deweightPars
    fairLinOut$sensNames <- sensNames
@@ -89,7 +89,7 @@ predict.qeFairRidgeLin <- function(object,newx,processNewx=FALSE)
    }
    newx <- as.data.frame(newx)
    class(object) <- c('qeLin','lm')
-   preds <- predict(object,newx)
-   preds
+   preds <- predict(object,newx,FALSE)
+   preds + object$yBar
 }
 
