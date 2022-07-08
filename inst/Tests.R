@@ -8,6 +8,8 @@ pima <- na.exclude(pima)
 
 library(qeML)
 
+print("don't just check with Pima; all numeric, no factors")
+
 z <- qeFairRidgeLog(pima,'diabetes',list(pregnant=0.2),'age','pos',holdout=NULL)
 newx <- pima[5,-9]
 predict(z,newx)  # 0.5913352
