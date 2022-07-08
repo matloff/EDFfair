@@ -23,7 +23,7 @@ set.seed(9999)
 z <- qeFairKNN(pima,'diabetes',list(pregnant=0.2),'age','pos')
 holdout set has  39 rows
 z$testAcc  # 0.1794872
-z$baseAcc  # 0.8903061
+z$baseAcc  # 0.3316327
 z$corrs  # 0.4355221
 
 # qeFairRidgeLin; NOTE: will replace current by the one in New*R

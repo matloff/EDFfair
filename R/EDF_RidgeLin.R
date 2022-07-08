@@ -38,7 +38,7 @@ qeFairRidgeLin <- function(data,yName,deweightPars,sensNames=NULL,
    dataExtended[,yCol] <- yExtended
    names(dataExtended)[yCol] <- yName
 
-   fairLinOut <- qeLin(dataExtended,yName,holdout=NULL)
+   fairLinOut <- qeLin(dataExtended,yName,minus1=TRUE,holdout=NULL)
    tmp <- data[,yName]
 
    fairLinOut$yName <- yName
