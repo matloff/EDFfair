@@ -31,7 +31,7 @@
 # note that prepData() does not call splitData(); this is assumed to be
 # done by the qeML function
 
-prepData <- gtools::defmacro(zzz,scaling='mmscale',expr=
+prepData <- defmacro(zzz,scaling='mmscale',expr=
    {
       ycol <- which(names(data) == yName)
       y <- data[,ycol]
@@ -78,11 +78,12 @@ prepData <- gtools::defmacro(zzz,scaling='mmscale',expr=
 
 # res is the return value of qeFair*()
 
-predictHoldoutFair <- gtools::defmacro(res,
+predictHoldoutFair <- defmacro(res,
    expr={
       ycol <- which(names(tst) == yName);
       ycolData <- which(names(data) == yName);
       tstx <- tst[,-ycol,drop=FALSE];
+      attr(tstx,'noNeedPrepNewx') <- TRUE
       preds <- predict(res,tstx);
       res$holdoutPreds <- preds;
       if (res$classif) {

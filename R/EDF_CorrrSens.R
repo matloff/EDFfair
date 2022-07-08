@@ -63,8 +63,11 @@ corrsens <- function(data,yName,fittedObject,sensNames=NULL)
    }
 
    preds <- 
-      if (SU) fittedObject$holdoutPreds
-      else if(classif) fittedObject$holdoutPreds$probs[,1]
+      if (SU) fittedObject$holdoutPreds 
+      else if (classif %% is.numeric(fittedObject$holdoutPreds))
+         fittedObject$holdoutPreds
+      else if(classif && is.list(fittedObject$holdoutPreds))
+            fittedObject$holdoutPreds$probs[,1]
       else fittedObject$holdoutPreds
 
    xNames <- setdiff(names(data),c(yName,sensNames))
@@ -123,6 +126,7 @@ corrsens <- function(data,yName,fittedObject,sensNames=NULL)
             }
          }
       } else {
+         if (is.matrix(preds)) preds <- as.vector(preds)
          corrs <- c(corrs,cor(preds,sens)^2)
          nCorrs <- nCorrs + 1
          names(corrs)[nCorrs] <- sensNm
