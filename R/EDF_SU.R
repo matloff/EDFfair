@@ -34,10 +34,12 @@ qeSU <- function(data,yName,deweightPars,sensNames,suFtn='frrm',
       trnCol <- trn[,i]
       if (is.integer(trnCol)) trn[,i] <- as.double(trnCol)
    }
+
    suOut <- suFtn(trn[,yCol],trn[,xCols],trn[,sensCols],unfairness)
 
    suOut$unfairness <- unfairness
    suOut$sensNames <- sensNames
+   suOut$nonSensNames <- setdiff(names(data),sensNames)
    suOut$holdIdxs <- holdIdxs
 
    classif <- identical(suFtn,fgrrm)
@@ -50,6 +52,8 @@ qeSU <- function(data,yName,deweightPars,sensNames,suFtn='frrm',
    suOut$sensCols <- sensCols
    suOut$xCols <- xCols
    suOut$yCol <- yCol
+   suOut$scaling <- 'none'
+   suOut$trainRow1 <- getRow1(data[suOut$nonSensNames],yName)
 
    class(suOut) <- c('qeSU',class(suOut))
 
@@ -76,14 +80,15 @@ qeSU <- function(data,yName,deweightPars,sensNames,suFtn='frrm',
 
 predict.qeSU <- function(object,newx,newsens)
 {
-   processNewx <- is.null(attr(newx,'noNeedPrepNewx'))
-   if (processNewx) newx <- prepNewx(object,newx)
+   ## processNewx <- is.null(attr(newx,'noNeedPrepNewx'))
+   ## if (processNewx) newx <- prepNewx(object,newx)
 
    # fairml quirk: integer isn't considered numeric
    for (i in 1:ncol(newx)) {
       newxCol <- newx[,i]
       if (is.integer(newxCol)) newx[,i] <- as.double(newxCol)
    }
+   if (is.integer(newsens)) newsens <- as.double(newsens)
    class(object) <- class(object)[-1]
    predict(object,newx,newsens)
 }

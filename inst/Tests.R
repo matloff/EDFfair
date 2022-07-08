@@ -30,15 +30,21 @@ z$corrs  # 0.4355221
 
 # qeFairRidgeLin; NOTE: will replace current by the one in New*R
 z <- qeFairRidgeLin(pef,'wageinc',list(occ=0.2),'sex',holdout=NULL)
-predict(z,pef[1,-5])  # 76741.08
-predict(z,pef[1,-(4:5)])  # 76741.08
+predict(z,pef[1,-5])  # 77260.69
+predict(z,pef[1,-(4:5)])  # 77260.69
 set.seed(9999)
 z <- qeFairRidgeLin(pef,'wageinc',list(occ=0.2),'sex')
-z$testAcc  # 26085.05
+z$testAcc  # 26070.07
 z$baseAcc  # 32686.57
-z$corrs  # 0.2453135 
+z$corrs  # 0.2456668
 
 z <- qeSU(pef,'wageinc',list(unfairness=0.2),'sex',holdout=NULL)
+predict(z,pef[1,-(4:5)],pef[1,4])  # 70691.8, MUST use 4:5, not 5
+set.seed(9999)
+z <- qeSU(pef,'wageinc',list(unfairness=0.2),'sex')
+z$testAcc  # 25946.28
+z$baseAcc  # NULL, must fix
+z$corrs  # 0.243306
 
 
 
