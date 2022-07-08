@@ -4,5 +4,5 @@ import('gtools')
 
 
 export(
-qeFairKNN, qeFairRF, qeFairRidgeLin, qeSU, qeFairSVM
+qeFairKNN, qeFairRF, qeFairRidgeLin, qeFairRidgeLog, qeSU, qeFairSVM
 )
