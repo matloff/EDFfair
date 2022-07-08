@@ -38,17 +38,18 @@ qeFairRidgeLin <- function(data,yName,deweightPars,sensNames=NULL,
    dataExtended[,yCol] <- yExtended
    names(dataExtended)[yCol] <- yName
 
-   fairLinOut <- qeLin(dataExtended,yName,minus1=TRUE,holdout=NULL)
+   fairLinOut <- qeLin(dataExtended,yName,noBeta0=TRUE,holdout=NULL)
    tmp <- data[,yName]
 
    fairLinOut$yName <- yName
    fairLinOut$deweightPars <- deweightPars
    fairLinOut$sensNames <- sensNames
    fairLinOut$factorsInfo <- factorsInfo
+   fairLinOut$trainRow1 <- getRow1(data1,yName)
    fairLinOut$trainRow1 <- trainRow1
    fairLinOut$scalePars <- scalePars
    fairLinOut$classif <- FALSE
-   class(fairLinOut) <- c('qeFairRidgeLin')
+   class(fairLinOut) <- c('qeFairRidgeLin','qeLin')
 
    if (!is.null(holdout)) {      
       # need to turn off scaling in the case of predicting holdouts, as
@@ -87,7 +88,7 @@ predict.qeFairRidgeLin <- function(object,newx,processNewx=FALSE)
       nr <- nrow(newx)
    }
    newx <- as.data.frame(newx)
-   class(object) <- c('glm','lm')
+   class(object) <- c('qeLin','lm')
    preds <- predict(object,newx)
    preds
 }
