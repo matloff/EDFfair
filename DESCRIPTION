@@ -1,11 +1,14 @@
-Package: EDF
+Package: EDFfair
 Version: 1.0
-Title: EDF
-Author: Norman Matloff <matloff@cs.ucdavis.edu>,
-        Wenxi Zhang <zwenxi22@gmail.com>
-      
-Maintainer: Norman Matloff <matloff@cs.ucdavis.edu>
-            Wenxi Zhang <zwenxi22@gmail.com>,
-License: GPL (>= 2)
-Description: Explicitly Deweighted Features. reduces the impact of each feature in the proxies of sensitive variables in X variebles with a different amount ofdeweighting applied to each such feature.
+Title: EDFfair
+Authors@R: c(
+   person("Norm", "Matloff", email = "matloff@cs.ucdavis.edu",
+      role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9179-6785")),
+   person("Wenxi", "Zhang", email = "zwenxi22@gmail.com", role = "aut"))
+Maintainer: Norman Matloff <matloff@cs.ucdavis.edu>,
+            Wenxi Zhang <zwenxi22@gmail.com>
 Imports: regtools, qeML, gtools
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+License: GPL (>= 2)
+Description: Explicitly Deweighted Features. Reduces the impact of each feature in the proxies of sensitive variables in X variebles with a different amount ofdeweighting applied to each such feature.
