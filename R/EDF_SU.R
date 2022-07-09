@@ -18,8 +18,8 @@ qeSU <- function(data,yName,deweightPars,sensNames,
          stop('must set yesYVal for classification case')
       y <- (y == yesYVal)
       data[,yName] <- as.double(y)
-      suFtn <- frrm
-   } else suFtn <- fgrm
+      suFtn <- fgrrm
+   } else suFtn <- frrm
 
    if (!is.null(holdout)) {
       holdIdxs <- sample(1:nrow(data),holdout)
