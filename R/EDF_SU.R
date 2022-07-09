@@ -1,8 +1,8 @@
 
 
  
-qeSU <- function(data,yName,deweightPars,sensNames,suFtn='frrm',
-   yesYVal=0,holdout=floor(min(1000,0.1*nrow(data))))
+qeSU <- function(data,yName,deweightPars,sensNames,
+   yesYVal=NULL,holdout=floor(min(1000,0.1*nrow(data))))
 {
 
    require(qeML)
@@ -11,7 +11,15 @@ qeSU <- function(data,yName,deweightPars,sensNames,suFtn='frrm',
    data <- na.exclude(data)
 
    unfairness <- deweightPars$unfairness
-   suFtn <- get(suFtn)
+   y <- data[,yName]
+   classif <- is.factor(y)
+   if (classif) {
+      if (is.null(yesYVal))
+         stop('must set yesYVal for classification case')
+      y <- (y == yesYVal)
+      data[,yName] <- as.double(y)
+      suFtn <- frrm
+   } else suFtn <- fgrm
 
    if (!is.null(holdout)) {
       holdIdxs <- sample(1:nrow(data),holdout)
