@@ -16,8 +16,8 @@ qeSU <- function(data,yName,deweightPars,sensNames,
    if (classif) {
       if (is.null(yesYVal))
          stop('must set yesYVal for classification case')
-      y <- (y == yesYVal)
-      data[,yName] <- as.double(y)
+      ## y <- (y == yesYVal)
+      ## data[,yName] <- as.double(as.integer(y))
       suFtn <- fgrrm
    } else suFtn <- frrm
 
@@ -42,7 +42,7 @@ qeSU <- function(data,yName,deweightPars,sensNames,
       trnCol <- trn[,i]
       if (is.integer(trnCol)) trn[,i] <- as.double(trnCol)
    }
-
+browser()
    suOut <- suFtn(trn[,yCol],trn[,xCols],trn[,sensCols],unfairness)
 
    suOut$unfairness <- unfairness
