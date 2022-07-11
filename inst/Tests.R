@@ -6,12 +6,12 @@ data(PimaIndiansDiabetes2)
 pima <- PimaIndiansDiabetes2
 pima <- na.exclude(pima)
 
+library(qeML)
+data(pef)
 pef1 <- pef
 occ <- ifelse(pef1$occ == '100','yes100','no100')
 occ <- as.factor(occ)
 pef1$occ <- occ
-
-library(qeML)
 
 print("don't just check with Pima; all numeric, no factors")
 
@@ -23,11 +23,12 @@ z <- qeFairRidgeLog(pima,'diabetes',list(pregnant=0.2),'age','pos')
 z$testAcc  # 0.2307692
 z$baseAcc  # 0.3316327
 z$corrs  # 0.3059256
-z <- qeFairRidgeLog(pef1,'occ',list(age=0.2),'sex','yes10')  
+set.seed(9999)
+z <- qeFairRidgeLog(pef1,'occ',list(age=0.2),'sex','yes100')  
 # buggy for X factors, compare to new qeFairRidgeLin
-
-
-
+z$testAcc # 0.247
+z$baseAcc # 0.2285714
+z$corrs # 0.6103466 
 
 z <- qeFairKNN(pima,'diabetes',list(pregnant=0.2),'age','pos',holdout=NULL)
 predict(z,newx)  # 0.48

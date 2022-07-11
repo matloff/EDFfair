@@ -24,6 +24,7 @@ qeFairRidgeLog <- function(data,yName,deweightPars,sensNames=NULL,
       dataNonSensTrn <- trn
    } else dataNonSensTrn <- dataNonSens
 
+browser()
    # set up the lambdas
    p <- ncol(dataNonSensTrn) - 1
    dataExtended <- rbind(dataNonSensTrn,dataNonSensTrn[1:p,])
@@ -34,7 +35,7 @@ qeFairRidgeLog <- function(data,yName,deweightPars,sensNames=NULL,
    tmp[deweightNames] <- sqrt(deweightVals)
    newx <- as.data.frame(diag(tmp))
    names(newx) <- namesX
-   dataY <- data[,yName]
+   dataY <- dataNonSens[,yName]
    whichYesY <- which(levels(dataY) == yesYVal)
    whichNoY <- which(levels(dataY) != yesYVal)
    noYVal <- levels(dataY)[whichNoY]
@@ -64,6 +65,7 @@ qeFairRidgeLog <- function(data,yName,deweightPars,sensNames=NULL,
       # need to turn off scaling in the case of predicting holdouts, as
       # they have already been scaled
       fairLogOut$scaling <- 'none'  
+      fairLogOut$factorsInfo <- NULL
       predictHoldoutFair(fairLogOut)
       fairLogOut$holdIdxs <- holdIdxs
    }
