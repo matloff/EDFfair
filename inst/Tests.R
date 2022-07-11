@@ -45,6 +45,10 @@ z <- qeSU(pef,'wageinc',list(unfairness=0.2),'sex')
 z$testAcc  # 25946.28
 z$baseAcc  # NULL, must fix
 z$corrs  # 0.243306
+z <- qeSU(pima,'diabetes',list(unfairness=0.2),'age','pos',holdout=NULL)
+newx <- pima[5,-(8:9)]
+newsens <- pima[5,9]
+predict(z,newx,newsens)  # 0.5913352
 
 
 
