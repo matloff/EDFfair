@@ -34,16 +34,25 @@ qeSU <- function(data,yName,deweightPars,sensNames,
    allNames <- names(trn)
    findidx <- function(sn) grep(sn,allNames)
    sensCols <- sapply(sensNames,findidx)
+   if (length(sensNames) > 1)
+      stop('currently only one S variable is allowed')
    yCol <- which(names(trn) == yName)
    xCols <- setdiff(1:ncol(trn),union(yCol,sensCols))
+   sensVar <- trn[,sensCols]
 
    # fairml quirk: integer isn't considered numeric
    for (i in 1:ncol(trn)) {
       trnCol <- trn[,i]
       if (is.integer(trnCol)) trn[,i] <- as.double(trnCol)
    }
-browser()
+
    suOut <- suFtn(trn[,yCol],trn[,xCols],trn[,sensCols],unfairness)
+
+   # fill in info somehow lost by suFtn
+   s1classes <- class(sensVar)
+   names(s1classes) <- 'S1'
+   suOut$data$senstive$classes <- s1classes
+   suOut$data$sensitive$levels$S1 <- levels(sensVar)
 
    suOut$unfairness <- unfairness
    suOut$sensNames <- sensNames
@@ -97,6 +106,7 @@ predict.qeSU <- function(object,newx,newsens)
       if (is.integer(newxCol)) newx[,i] <- as.double(newxCol)
    }
    if (is.integer(newsens)) newsens <- as.double(newsens)
+
    class(object) <- class(object)[-1]
    predict(object,newx,newsens)
 }

@@ -47,8 +47,13 @@ z$baseAcc  # NULL, must fix
 z$corrs  # 0.243306
 z <- qeSU(pima,'diabetes',list(unfairness=0.2),'age','pos',holdout=NULL)
 newx <- pima[5,-(8:9)]
-newsens <- pima[5,9]
-predict(z,newx,newsens)  # 0.5913352
+newsens <- pima[5,8]
+predict(z,newx,newsens)  # 0.3656508
+z <- qeSU(pima,'diabetes',list(unfairness=0.2),'age','pos')
+z$testAcc  # 0.3333333
+> z$baseAcc  # NULL, must fix
+z$corrs  0.2863631
+
 
 
 
