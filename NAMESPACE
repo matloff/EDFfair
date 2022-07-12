@@ -3,11 +3,8 @@ import('regtools')
 import('gtools')
 
 
-export(
-   qeFairKNN, qeFairRF, qeFairRidgeLin, qeFairRidgeLog, qeSU, qeFairSVM,
-   corrsens, , qeFairKNN, runExpt, xyzPlotEDF
-
-)
+export(qeFairKNN, qeFairRF, qeFairRidgeLin, qeFairRidgeLog, qeSU, qeFairSVM,
+   corrsens, qeFairKNN, runExpt, xyzPlotEDF)
 
 S3method(predict,qeFairKNN)
 S3method(predict,qeFairRF)
