@@ -39,39 +39,40 @@
  
 qeFairRF <- function(data,yName,deweightPars,sensNames=NULL,
    nTree=500,minNodeSize=10,mtry = floor(sqrt(ncol(data))),
-   holdout=floor(min(1000,0.1*nrow(data))))
+   yesYVal=NULL,holdout=floor(min(1000,0.1*nrow(data))))
 {
    require(qeML)
 
-   prepData(1)
+   prepData(1,scaling='none')
 
    rfout <- qeRFranger(data2,'y',
       nTree=nTree,minNodeSize=minNodeSize,mtry=mtry,
       deweightNames=deweightNames,deweightVal=deweightVals,
-      holdout=holdout)
+      yYesName=yesYVal,holdout=holdout)
 
-   srout <- list(rfout=rfout)
-   srout$classif <- rfout$classif
-   srout$deweightNames <- deweightNames
-   srout$deweightVals <- deweightVals
-   srout$sensNames <- sensNames
-   srout$trainRow1 <- trainRow1
-   srout$factorsInfo <- factorsInfo
-   class(srout) <- c('qeFairRF')
-   srout$holdIdxs <- rfout$holdIdxs
-   srout$holdoutPreds <- rfout$holdoutPreds
-   srout$testAcc <- rfout$testAcc
-   srout$baseAcc <- rfout$baseAcc
-   srout$confusion <- rfout$confusion
+   rfout <- list(rfout=rfout)
+   rfout$classif <- rfout$classif
+   rfout$deweightNames <- deweightNames
+   rfout$deweightVals <- deweightVals
+   rfout$sensNames <- sensNames
+   rfout$trainRow1 <- trainRow1
+   rfout$factorsInfo <- factorsInfo
+   class(rfout) <- c('qeFairRF')
+   rfout$holdIdxs <- rfout$holdIdxs
+   rfout$holdoutPreds <- rfout$holdoutPreds
+   rfout$testAcc <- rfout$testAcc
+   rfout$baseAcc <- rfout$baseAcc
+   rfout$confusion <- rfout$confusion
+   rfout$scaling <- 'nne'
 
    if (!is.null(sensNames) && !is.null(holdout)) {
-      srout$corrs <- corrsens(data,yName,srout,sensNames)
-      if (srout$classif)
-         srout$sensConfusion <- calcSensConfusion(data,data1,yName,
-            srout$holdIdxs,srout$holdoutPreds,sensNames)
+      rfout$corrs <- corrsens(data,yName,rfout,sensNames)
+      if (rfout$classif)
+         rfout$sensConfusion <- calcSensConfusion(data,data1,yName,
+            rfout$holdIdxs,rfout$holdoutPreds,sensNames)
    }
 
-   srout
+   rfout
 }
 
 predict.qeFairRF <- function(object,newx)
