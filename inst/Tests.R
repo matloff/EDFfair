@@ -23,9 +23,9 @@ z <- qeFairRidgeLog(pima,'diabetes',list(pregnant=0.2),'age','pos')
 z$testAcc  # 0.2307692
 z$baseAcc  # 0.3316327
 z$corrs  # 0.3059256
+# must test on data in which some X are factors
 set.seed(9999)
 z <- qeFairRidgeLog(pef1,'occ',list(age=0.2),'sex','yes100')  
-# buggy for X factors, compare to new qeFairRidgeLin
 z$testAcc # 0.247
 z$baseAcc # 0.2285714
 z$corrs # 0.6103466 
