@@ -50,29 +50,29 @@ qeFairRF <- function(data,yName,deweightPars,sensNames=NULL,
       deweightNames=deweightNames,deweightVal=deweightVals,
       yYesName=yesYVal,holdout=holdout)
 
-   rfout <- list(rfout=rfout)
-   rfout$classif <- rfout$classif
-   rfout$deweightNames <- deweightNames
-   rfout$deweightVals <- deweightVals
-   rfout$sensNames <- sensNames
-   rfout$trainRow1 <- trainRow1
-   rfout$factorsInfo <- factorsInfo
-   class(rfout) <- c('qeFairRF')
-   rfout$holdIdxs <- rfout$holdIdxs
-   rfout$holdoutPreds <- rfout$holdoutPreds
-   rfout$testAcc <- rfout$testAcc
-   rfout$baseAcc <- rfout$baseAcc
-   rfout$confusion <- rfout$confusion
-   rfout$scaling <- 'none'
+   fairRFout <- list(rfout=rfout)
+   fairRFout$classif <- rfout$classif
+   fairRFout$deweightNames <- deweightNames
+   fairRFout$deweightVals <- deweightVals
+   fairRFout$sensNames <- sensNames
+   fairRFout$trainRow1 <- trainRow1
+   fairRFout$factorsInfo <- factorsInfo
+   class(fairRFout) <- c('qeFairRF')
+   fairRFout$holdIdxs <- rfout$holdIdxs
+   fairRFout$holdoutPreds <- rfout$holdoutPreds
+   fairRFout$testAcc <- rfout$testAcc
+   fairRFout$baseAcc <- rfout$baseAcc
+   fairRFout$confusion <- rfout$confusion
+   fairRFout$scaling <- 'none'
 
    if (!is.null(sensNames) && !is.null(holdout)) {
-      rfout$corrs <- corrsens(data,yName,rfout,sensNames)
-      if (rfout$classif)
-         rfout$sensConfusion <- calcSensConfusion(data,data1,yName,
-            rfout$holdIdxs,rfout$holdoutPreds,sensNames)
+      fairRFout$corrs <- corrsens(data,yName,rfout,sensNames)
+      if (fairRFout$classif)
+         fairRFout$sensConfusion <- calcSensConfusion(data,data1,yName,
+            fairRFout$holdIdxs,fairRFout$holdoutPreds,sensNames)
    }
 
-   rfout
+   fairRFout
 }
 
 predict.qeFairRF <- function(object,newx)
