@@ -40,21 +40,16 @@ qeFairKNN <- function(data,yName,
 
    knnout <- qeKNN(data1,yName,k,yesYVal=yesYVal,
       expandVars=expandVars,expandVals=expandVals,,
-      holdout=holdout)
+      holdout=NULL)
 
    srout <- list(knnout=knnout)
    srout$factorsInfo <- knnout$factorsInfo
-   srout$classif <- TRUE
+   srout$classif <- classif
    srout$deweightNames <- deweightNames
    srout$deweightVals <- deweightVals
    srout$sensNames <- sensNames
    srout$trainRow1 <- trainRow1
    class(srout) <- c('qeFairKNN')
-   srout$holdIdxs <- knnout$holdIdxs
-   srout$holdoutPreds <- knnout$holdoutPreds
-   srout$testAcc <- knnout$testAcc
-   srout$baseAcc <- knnout$baseAcc
-   srout$confusion <- knnout$confusion
    srout$scalePars <- scalePars
    srout$yesYVal <- yesYVal
    if (!is.null(yesYVal)) {
@@ -62,14 +57,15 @@ qeFairKNN <- function(data,yName,
       noYVal <- lvlsY[3 - which(lvlsY==yesYVal)]
       srout$noYVal <- noYVal
    }
-
+browser()
    if (!is.null(holdout)){
-      idxs <- srout$holdIdxs
+      idxs <- sample(1:nrow(data1),holdout)
+      srout$holdIdxs <- idxs
       trn <- data1[-idxs,]
       tst <- data1[idxs,]
       ycol <- which(colnames(tst) == yName)
-      tst[,ycol] <- as.integer(tst[,ycol] == yesYVal)
-      predictHoldout(srout)
+      if (classif) tst[,ycol] <- as.integer(tst[,ycol] == yesYVal)
+      predictHoldoutFair(srout)
       srout$corrs <- corrsens(data,yName,srout,sensNames)
    }
    srout
@@ -94,7 +90,7 @@ qeFairKNN <- function(data,yName,
 
 #       vector of predicted values
 
-predict.qeFairKNN <- function(object,newx,needsSetup=FALSE)
+predict.qeFairKNN <- function(object,newx,needsSetup=TRUE)
 {
 
    # remove the sensitive variables, if any
@@ -118,7 +114,8 @@ predict.qeFairKNN <- function(object,newx,needsSetup=FALSE)
    }
    
    
-   predict(knnout,newx)
+   preds <- predict(knnout,newx)
+   as.vector(preds)
 }
  
 

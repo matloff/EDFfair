@@ -105,7 +105,8 @@ predictHoldoutFair <- defmacro(res,
          res$sensConfusion <- lapply(sensNames,doOneConfMatrix)
       } else {
          res$testAcc <- mean(abs(preds - tst[,ycol]))
-         res$baseAcc <-  mean(abs(tst[,ycol] - mean(data[,ycolData])))
+         trnYcol <- which(names(trn) == yName)
+         res$baseAcc <-  mean(abs(tst[,ycol] - mean(trn[,trnYcol])))
       }
    }
 )
