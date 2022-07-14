@@ -1,0 +1,18 @@
+
+replicMeans(50,"knn_corrsens(mtg,'deny',deweightPars=c(loan_val=0.2),'black')")
+#black.0   black.1 
+#0.7363365 0.7793342
+
+replicMeans(50,"knn_corrsens(mtg,'deny',deweightPars=c(loan_val=0.6),'black')")
+#black.0   black.1 
+#0.7754054 0.7680551
+
+replicMeans(50,"knn_corrsens(mtg,'deny',deweightPars=c(loan_val=0.8),'black')")
+#black.0   black.1 
+#0.7824657 0.7755986 
+
+replicMeans(50,"knn_corrsens(mtg,'deny',deweightPars=c(loan_val=1),'black')")
+#black.0   black.1 
+#0.7864811 0.7750692 
+
+correlation between fitted values of full model(with s) and the EDF model with deweighting C
