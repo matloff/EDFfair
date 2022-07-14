@@ -63,7 +63,7 @@ qeFairRF <- function(data,yName,deweightPars,sensNames=NULL,
    rfout$testAcc <- rfout$testAcc
    rfout$baseAcc <- rfout$baseAcc
    rfout$confusion <- rfout$confusion
-   rfout$scaling <- 'nne'
+   rfout$scaling <- 'none'
 
    if (!is.null(sensNames) && !is.null(holdout)) {
       rfout$corrs <- corrsens(data,yName,rfout,sensNames)
