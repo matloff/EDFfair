@@ -57,7 +57,6 @@ qeFairKNN <- function(data,yName,
       noYVal <- lvlsY[3 - which(lvlsY==yesYVal)]
       srout$noYVal <- noYVal
    }
-browser()
    if (!is.null(holdout)){
       idxs <- sample(1:nrow(data1),holdout)
       srout$holdIdxs <- idxs

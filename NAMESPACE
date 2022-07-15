@@ -4,7 +4,7 @@ import('gtools')
 
 
 export(qeFairKNN, qeFairRF, qeFairRidgeLin, qeFairRidgeLog, qeSU, qeFairSVM,
-   corrsens, prepData, runExpt, xyzPlotEDF)
+   corrsens, prepData, prepNewx, runExpt, xyzPlotEDF)
 
 S3method(predict,qeFairKNN)
 S3method(predict,qeFairRF)
