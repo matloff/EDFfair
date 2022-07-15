@@ -5,6 +5,8 @@ qeFairRidgeLog <- function(data,yName,deweightPars,sensNames=NULL,
 
    require(qeML)
 
+   if (yesYVal == 0) stop('missing yesYVal')
+
    yLevels <- levels(data[,yName])
    if (length(yLevels) != 2)
       stop('handles the 2-class setting only')
@@ -24,7 +26,6 @@ qeFairRidgeLog <- function(data,yName,deweightPars,sensNames=NULL,
       dataNonSensTrn <- trn
    } else dataNonSensTrn <- dataNonSens
 
-browser()
    # set up the lambdas
    p <- ncol(dataNonSensTrn) - 1
    dataExtended <- rbind(dataNonSensTrn,dataNonSensTrn[1:p,])
