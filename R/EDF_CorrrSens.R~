@@ -64,7 +64,7 @@ corrsens <- function(data,yName,fittedObject,sensNames=NULL)
 
    preds <- 
       if (SU) fittedObject$holdoutPreds 
-      else if (classif && is.numeric(fittedObject$holdoutPreds))
+      else if (classif %% is.numeric(fittedObject$holdoutPreds))
          fittedObject$holdoutPreds
       else if(classif && is.list(fittedObject$holdoutPreds))
             fittedObject$holdoutPreds$probs[,1]
