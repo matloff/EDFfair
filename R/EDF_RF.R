@@ -51,8 +51,7 @@ qeFairRF <- function(data,yName,deweightPars,sensNames=NULL,
 
    fairRFout <- list(rfout=rfout)
    fairRFout$classif <- rfout$classif
-   fairRFout$deweightNames <- deweightNames
-   fairRFout$deweightVals <- deweightVals
+   fairRFout$deweightPars <- deweightPars
    fairRFout$sensNames <- sensNames
    fairRFout$trainRow1 <- trainRow1
    fairRFout$factorsInfo <- factorsInfo
