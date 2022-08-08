@@ -95,14 +95,14 @@ predictHoldoutFair <- defmacro(res,
          preds <- list(probs=probs,predClasses=predClasses)
          res$testAcc <- mean(preds$predClasses != tst[,ycol])
          res$baseAcc <- 1 - max(table(data[,ycolData])) / nrow(data)
-         res$confusion <- regtools::confusion(tst[,ycol],preds$predClasses)
+         # res$confusion <- regtools::confusion(tst[,ycol],preds$predClasses)
          doOneConfMatrix <- function(sensName) 
          {
             tmp <- sensName
             sens <- data[[tmp]][idxs]
             table(tst[,ycol],preds$predClasses,sens)
          }
-         res$sensConfusion <- lapply(sensNames,doOneConfMatrix)
+         # res$sensConfusion <- lapply(sensNames,doOneConfMatrix)
       } else {
          res$testAcc <- mean(abs(preds - tst[,ycol]))
          trnYcol <- which(names(trn) == yName)
