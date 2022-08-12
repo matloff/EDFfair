@@ -1,7 +1,7 @@
 
 
  
-qeSU <- function(data,yName,deweightPars,sensNames,
+qeSU <- function(data,yName,deweightPars,sensNames,lambda,
    yesYVal=NULL,holdout=floor(min(1000,0.1*nrow(data))))
 {
 
@@ -46,7 +46,8 @@ qeSU <- function(data,yName,deweightPars,sensNames,
       if (is.integer(trnCol)) trn[,i] <- as.double(trnCol)
    }
 
-   suOut <- suFtn(trn[,yCol],trn[,xCols],trn[,sensCols],unfairness)
+   suOut <- 
+      suFtn(trn[,yCol],trn[,xCols],trn[,sensCols],unfairness,lambda=lambda)
 
    # fill in info somehow lost by suFtn
    s1classes <- class(sensVar)
