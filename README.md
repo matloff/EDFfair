@@ -8,9 +8,8 @@ as described in [our paper](https://t.co/8797n3znGB).
 ## Installation
 
 The package depends on NM's 
-[qeML package ("Quick and Easy Machine Learning"](https://t.co/8797n3znGB), soon to be uploaded to CRAN but for now fully usable at
-[NM's GitHub repo site](https://github.com/matloff/qeML).  Both should
-be easy to install, but let NM know if any issues.
+[qeML package ("Quick and Easy Machine Learning"](http://github.com/matloff/qeML), soon to be uploaded to CRAN but for now fully usable now.
+Both should be easy to install, but let NM know if any issues.
 
 ## Example
 
