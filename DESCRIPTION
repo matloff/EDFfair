@@ -11,4 +11,4 @@ Imports: regtools, qeML, gtools
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL (>= 2)
-Description: Explicitly Deweighted Features. Reduces the impact of each feature in the proxies of sensitive variables in X variebles with a different amount ofdeweighting applied to each such feature.
+Description: Explicitly Deweighted Features. Reduces the impact of each feature in the proxies of sensitive variables in X variebles with a different amount of deweighting applied to each such feature.  See Matloff and Zhang, http://arxiv.org/abs/2208.06557 
