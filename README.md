@@ -96,7 +96,7 @@ number of weeks worked:
 
 ``` r
 
-z <- qeFairRidgeLin(data=pef,yName='wageinc',deweightPars=list(occ=1.0,wkswrkd=0.4),sensNames='sex'); c(z$testAcc,z$corrs)
+z <- qeFairRidgeLin(data=pef,yName='wageinc',deweightPars=list(occ=1.0,wkswrkd=0.4),sensNames='sex')
 
 
 ```
@@ -105,3 +105,9 @@ Or, we could try random forests instead of a linear model.  Note that
 here (and with the k-Nearest Neighbors function), smaller values of the
 deweighting parameters mean more fairness.
 
+``` r
+
+z <- qeFairRF(data=pef,yName='wageinc',deweightPars=list(occ=1.0,wkswrkd=0.4),sensNames='sex')
+
+
+```
