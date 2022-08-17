@@ -1,14 +1,21 @@
-# EDF: Explicitly Deweighted Features, for Fair ML
+# EDFfair: Explicitly Deweighted Features, for Fair ML
+
+Authors:  Norm Matloff and Wenxi Zhang.
 
 ## Overview
 
-EDF reduces the impact of each feature in the proxies of sensitive variables in X variebles with a different amount ofdeweighting applied to each such feature,
-as described in [our paper](https://t.co/8797n3znGB).
+EDF reduces the impact of each feature in the proxies of sensitive
+variables among the X features, with a different amount of deweighting
+appliable to each such feature, as described in [our
+paper](https://t.co/8797n3znGB).
+
+The goal is to give the user control over the Fairness/Utility Tradeoff,
+choosing the desired weighting of fairness and prediction accuracy.
 
 ## Installation
 
 The package depends on NM's 
-[qeML package ("Quick and Easy Machine Learning"](http://github.com/matloff/qeML), soon to be uploaded to CRAN but for now fully usable now.
+[qeML package ("Quick and Easy Machine Learning"](http://github.com/matloff/qeML), soon to be uploaded to CRAN but for now fully usable from GitHub.
 Both should be easy to install, but let NM know if any issues.
 
 ## Example
@@ -24,7 +31,7 @@ names(pef)
 ```
 
 Let's see if we can predict income, using sex as the sensitive (and thus
-excluded) variable, but treat occupation as the proxy.  (See the paper
+excluded) variable, but treating occupation as the proxy.  (See the paper
 for explanation of the gendered nature of occupation.)
 
 Let's try a linear model.  Note that larger values of the deweighting
@@ -42,7 +49,7 @@ z$testAcc
 ```
 
 Mean Absolute Prediction Error on the holdout set (default: 1000 rows)
-was about $27,000.  That's out measure of utility.  What about fairness?
+was about $27,000.  That's our measure of utility.  What about fairness?
 
 ``` r
 
@@ -88,8 +95,8 @@ holdout set, with a standard error of about $109.  (To get an
 approximate 95% confidence interval, we add and subtract 1.96 times this
 value to $25535.78.)
 
-However, the single-holdout set run we had below seems to have been
-overly optimistic; the true fairness valuee is about 0.22.
+However, the single-holdout set run we had earlier seems to have been
+overly optimistic; the true fairness value is about 0.22.
 
 We may then try to add another proxy varialble to occupation, say the
 number of weeks worked:
