@@ -90,7 +90,8 @@ predictHoldoutFair <- defmacro(res,
          if (is.numeric(preds)) {
             probs <- preds
             tmp <- round(preds)
-            predClasses <- res$yLevels[tmp+1]
+            # predClasses <- res$yLevels[tmp+1]
+            predClasses <- ifelse(tmp,yesYVal,noYVal)
          }
          preds <- list(probs=probs,predClasses=predClasses)
          res$testAcc <- mean(preds$predClasses != tst[,ycol])

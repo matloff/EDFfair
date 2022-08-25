@@ -30,17 +30,18 @@ qeFairKNN <- function(data,yName,
    nonSensNames <- setdiff(names(data),sensNames)
    data1 <- data[nonSensNames]
 
-   classif <- is.factor(yName)
-   if (classif) classNames <- levels(yName)
+   y <- data[yName][,1]
+   classif <- is.factor(y)
+   if (classif) classNames <- levels(y)
 
    deweightNames <- names(deweightPars)
    deweightVals <- unlist(deweightPars)
    expandVars <- deweightNames
-   expandVals <- 1/deweightVals 
+   expandVals <- deweightVals 
 
    knnout <- qeKNN(data1,yName,k,yesYVal=yesYVal,
       expandVars=expandVars,expandVals=expandVals,,
-      holdout=NULL)
+      holdout=holdout)
 
    srout <- list(knnout=knnout)
    srout$factorsInfo <- knnout$factorsInfo
@@ -58,11 +59,6 @@ qeFairKNN <- function(data,yName,
       srout$noYVal <- noYVal
    }
    if (!is.null(holdout)){
-      idxs <- sample(1:nrow(data1),holdout)
-      srout$holdIdxs <- idxs
-      trn <- data1[-idxs,]
-      tst <- data1[idxs,]
-      ycol <- which(colnames(tst) == yName)
       if (classif) tst[,ycol] <- as.integer(tst[,ycol] == yesYVal)
       predictHoldoutFair(srout)
       srout$corrs <- corrsens(data,yName,srout,sensNames)
@@ -112,8 +108,10 @@ predict.qeFairKNN <- function(object,newx,needsSetup=TRUE)
       knnout$factorsInfo <- NULL
    }
    
-   
    preds <- predict(knnout,newx)
+   # if (knnout$classfic) {
+   #    ifelse(preds >= 0.5,knnout$yesYVal,knnout$noYVal)
+   # } else as.vector(preds)
    as.vector(preds)
 }
  
