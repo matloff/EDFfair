@@ -1,4 +1,4 @@
-# EDFfair: Explicitly Deweighted Features, for Fair ML
+# EDFfair: Explicitly Deweighted Features, for Fair ML  
 
 Authors:  Norm Matloff and Wenxi Zhang.
 
