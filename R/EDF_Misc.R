@@ -295,3 +295,41 @@ prepNewx <- function(object,newx)
    colnames(newx) <- cnames
    newx
 }
+
+#########################  getRow1  #####################################
+
+getRow1 <- function (data, yName)                                                   
+{                                                                                   
+    ycol <- which(names(data) == yName)                                             
+    data[1, -ycol]                                                                  
+}
+
+                                                                                   
+
+#########################  splitData  #####################################
+
+# requireNamespace(gtools)
+
+# standard split into training, test sets
+
+# arguments:
+#    holdout: holdout set size
+#    data: XY data frame
+
+# globals/value:
+#    tst: the generated holdout set
+#    data: the correspondingly reduced training set
+#    holdIdxs: indices of the holdout set in original ata
+
+splitData <- defmacro(holdout,data,
+   expr={
+      nHold <- holdout;
+      # cat('holdout set has ',nHold, 'rows\n');
+      idxs <- sample(1:nrow(data),nHold);
+      tst <- data[idxs,,drop=FALSE];
+      trn <- data[-idxs,,drop=FALSE];
+      data <- data[-idxs,,drop=FALSE];
+      holdIdxs <- idxs
+   }
+)
+
