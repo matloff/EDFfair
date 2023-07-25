@@ -8,6 +8,7 @@ Authors@R: c(
 Maintainer: Norman Matloff <matloff@cs.ucdavis.edu>,
             Wenxi Zhang <zwenxi22@gmail.com>
 Imports: regtools, qeML, gtools
+Depends: fairml
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL (>= 2)
