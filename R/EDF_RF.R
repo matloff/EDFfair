@@ -47,7 +47,7 @@ qeFairRF <- function(data,yName,deweightPars,sensNames=NULL,
 
    rfout <- qeRFranger(data2,'y',
       nTree=nTree,minNodeSize=minNodeSize,mtry=mtry,
-      deweightPars,yYesName=yesYVal,holdout=holdout)
+      deweightPars,yesYVal=yesYVal,holdout=holdout)
 
    fairRFout <- list(rfout=rfout)
    fairRFout$classif <- rfout$classif
